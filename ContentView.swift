@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var scoreboard = Scoreboard()
     @State private var startingPoints = 0
-    @FocusState private var focusedPlayerIndex: Int?
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -21,22 +20,7 @@ struct ContentView: View {
             
             SettingsView(startingPoints: $startingPoints, doesHighestScoreWin: $scoreboard.doesHighestScoreWin, playerCount: $scoreboard.playerCount)
                 .disabled(scoreboard.state != .setup)
-                .onChange(of: scoreboard.playerCount) { oldValue, newValue in
-                    if scoreboard.state == .setup {
-                        let oldCount = scoreboard.players.count
-                        scoreboard.updatePlayerCount()
-                        
-                        // Eğer oyuncu eklendiyse, yeni eklenen ilk oyuncuya odaklan
-                        if scoreboard.players.count > oldCount && focusedPlayerIndex == nil {
-                            focusedPlayerIndex = oldCount
-                        }
-                        
-                        // Eğer odaklanılan oyuncu silindiyse, focus'u güncelle
-                        if let focused = focusedPlayerIndex, focused >= scoreboard.players.count {
-                            focusedPlayerIndex = scoreboard.players.count - 1
-                        }
-                    }
-                }
+            //                .opacity(scoreboard.state != .setup ? 0 : 1.0)
             
             Grid {
                 GridRow {
@@ -51,31 +35,22 @@ struct ContentView: View {
                 
                 Divider()
                 
-                ForEach(Array(scoreboard.players.indices), id: \.self) { index in
+                ForEach($scoreboard.players) { $player in
                     GridRow {
                         HStack {
-                            if scoreboard.winners.contains(scoreboard.players[index]) {
+                            if scoreboard.winners.contains(player) {
                                 Image(systemName: "crown.fill")
                                     .foregroundStyle(Color.yellow)
                             }
                             
-                            TextField("Name", text: $scoreboard.players[index].name)
+                            TextField("Name", text: $player.name)
                                 .autocorrectionDisabled()
-                                .focused($focusedPlayerIndex, equals: index)
-                                .submitLabel(index == scoreboard.players.count - 1 ? .done : .next)
-                                .onSubmit {
-                                    if index < scoreboard.players.count - 1 {
-                                        focusedPlayerIndex = index + 1
-                                    } else {
-                                        focusedPlayerIndex = nil
-                                    }
-                                }
                         }
                         
-                        Text("\(scoreboard.players[index].score)")
+                        Text("\(player.score)")
                             .opacity(scoreboard.state == .setup ? 0 : 1.0)
                         
-                        Stepper("\(scoreboard.players[index].score)", value: $scoreboard.players[index].score)
+                        Stepper("\(player.score)", value: $player.score)
                             .labelsHidden()
                             .opacity(scoreboard.state == .setup ? 0 : 1.0)
                     }
@@ -84,11 +59,11 @@ struct ContentView: View {
             }
             .padding(.vertical)
             
-//            Button("Add Player", systemImage: "plus") {
-//                scoreboard.players.append(Player(name: "", score: 0))
-//            }
-//            .opacity(scoreboard.state == .setup ? 1.0 : 0)
-//            
+            Button("Add Player", systemImage: "plus") {
+                scoreboard.players.append(Player(name: "", score: 0))
+            }
+            .opacity(scoreboard.state == .setup ? 1.0 : 0)
+            
             Spacer()
             
             HStack {
@@ -97,11 +72,9 @@ struct ContentView: View {
                 switch scoreboard.state {
                 case .setup:
                     Button("Start Game", systemImage: "play.fill") {
-                        scoreboard.updatePlayerCount()
                         if !scoreboard.checkMinPlayerCount() {
                             scoreboard.resetScores(to: startingPoints)
                             scoreboard.state = .playing
-                            focusedPlayerIndex = nil
                         }
                     }
                 case .playing:
@@ -111,7 +84,6 @@ struct ContentView: View {
                 case .gameOver:
                     Button("Reset Game", systemImage: "arrow.counterclockwise") {
                         scoreboard.state = .setup
-                        focusedPlayerIndex = nil
                     }
                 }
                 
@@ -136,4 +108,4 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-}
+} 
