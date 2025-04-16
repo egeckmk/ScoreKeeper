@@ -13,10 +13,13 @@ struct ScoreKeeperTests {
     @Test("Reset player scores", arguments: [0, 10, 20])
     func resetScores(to newValue: Int) async throws {
         var scoreboard = Scoreboard(
-            players: [
-                Player(name: "Elisha", score: 0),
-                Player(name: "Andre", score: 5)
-            ])
+            state: GameState.gameOver,
+            doesHighestScoreWin: true,
+            playerCount: 2
+        )
+        
+        scoreboard.players.append(Player(name: "Elisha", score: 0))
+        scoreboard.players.append(Player(name: "Andre", score: 5))
         
         scoreboard.resetScores(to: newValue)
         
@@ -27,14 +30,16 @@ struct ScoreKeeperTests {
     
     @Test("Highest score wins")
     func highestScoreWins() {
-        let scoreboard = Scoreboard(
-            players: [
-                Player(name: "Elisha", score: 0),
-                Player(name: "Andre", score: 4)
-            ],
-            state: .gameOver,
-            doesHighestScoreWin: true
+        var scoreboard = Scoreboard(
+            state: GameState.gameOver,
+            doesHighestScoreWin: true,
+            playerCount: 2
         )
+        
+        scoreboard.players = [
+            Player(name: "Elisha", score: 0),
+            Player(name: "Andre", score: 4)
+        ]
         
         let winners = scoreboard.winners
         #expect(winners == [Player(name: "Andre", score: 4)])
@@ -42,14 +47,16 @@ struct ScoreKeeperTests {
     
     @Test("Lowest score wins")
     func lowestScoreWins() {
-        let scoreboard = Scoreboard(
-            players: [
-                Player(name: "Elisha", score: 0),
-                Player(name: "Andre", score: 4)
-            ],
-            state: .gameOver,
-            doesHighestScoreWin: false
+        var scoreboard = Scoreboard(
+            state: GameState.gameOver,
+            doesHighestScoreWin: false,
+            playerCount: 2
         )
+        
+        scoreboard.players = [
+            Player(name: "Elisha", score: 0),
+            Player(name: "Andre", score: 4)
+        ]
         
         let winners = scoreboard.winners
         #expect(winners == [Player(name: "Elisha", score: 0)])

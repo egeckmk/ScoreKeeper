@@ -10,18 +10,22 @@ import Foundation
 struct Scoreboard {
     var players: [Player] = []
     
-    var state = GameState.setup
-    var doesHighestScoreWin = true
-    var playerCount = 2
-    var showingPlayerCountAlert = false
+    var state: GameState
+    var doesHighestScoreWin: Bool
+    var playerCount: Int
 
-    init() {
+    init(state: GameState, doesHighestScoreWin: Bool, playerCount: Int, ) {
+        self.state = state
+        self.doesHighestScoreWin = doesHighestScoreWin
+        self.playerCount = playerCount
         // Başlangıçta playerCount kadar boş oyuncu ekle
         for _ in 0..<playerCount {
             players.append(Player(name: "", score: 0))
         }
     }
-
+    
+    var showingPlayerCountAlert = false
+    
     var winners: [Player] {
         guard state == .gameOver else  { return [] }
         

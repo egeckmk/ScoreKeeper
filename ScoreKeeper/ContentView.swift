@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var scoreboard = Scoreboard()
+    @State private var scoreboard = Scoreboard(state: .setup, doesHighestScoreWin: true, playerCount: 2)
+    
     @State private var startingPoints = 0
     @FocusState private var focusedPlayerIndex: Int?
     
